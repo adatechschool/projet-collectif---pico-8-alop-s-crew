@@ -9,7 +9,6 @@ function _init()
  create_stars()
  score=0
  state=0
- boss={}
 end
 
 function _update60()
@@ -31,7 +30,6 @@ function update_game()
 	end
  update_enemies()
  update_explosions()
- update_boss()
 end
 
 function draw_game()
@@ -56,9 +54,7 @@ function draw_game()
  --print("texte",x,y,couleur)
  print("score:\n"..score,2,2,11)
 	end
-	--affichage boss
-	spr(68,bo.x,bo.y,4,4,false,true)
-
+	
 -->8
 --bullets
 
@@ -146,8 +142,6 @@ function update_enemies()
 				if e.life==0 then 
 				del(enemies,e)
 				score+=100
-				if entype==15 then
-				new_boss
 				end
 			end
 		end
@@ -219,35 +213,6 @@ function draw_gameover()
 	print("score:\n"..score,50,50,3)
 	print("press c to continue",20,70,3)
 end
--->8
---big boss
-function spawn_boss(nombre)
-	gap=(128-16*nombre)/(nombre+1)
-	for i=1,nombre do
-		new_boss={
-			x=gap*i+16*(i-1),
-			y=-20,
-			life=50
-		}
-		add(boss,new_boss)
-	end
-end
-
-
-function update_boss()
-	for bo in all(boss) do
-		if bo.y < 30 then	
-			bo.y+=0
-		end
-		--collision
-		for b in all (bullets) do
-			if collision(bo,b) then
-				create_explosion(b.x,b.y)
-				del(bullets,b)
-				e.life-=1
-				if e.life==0 then 
-				del(boss,bo)
-				score+=100
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
