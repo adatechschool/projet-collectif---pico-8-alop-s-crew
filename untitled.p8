@@ -3,14 +3,18 @@ version 38
 __lua__
 frog_sprite=0
 frog_x=-8
-frog_y=4
+frog_y=-8
 frog_anim_time=0
 frog_anim_wait=.04
 
 function _update()
 	frog_x+=1
+	frog_y+=1
 	if frog_x > 128 then
 		frog_x=-8
+	end
+	if frog_y > 128 then
+		frog_y=-8
 	end	
 	
 	if time() - frog_anim_time > frog_anim_wait then
