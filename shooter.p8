@@ -7,8 +7,10 @@ function _init()
  enemies={}
  explosions={}
  create_stars()
+ boss={}
+ boss_bombs={}
  score=0
- state=0 
+ state=0
 end
 
 function _update60()
@@ -23,6 +25,7 @@ end
 
 function update_game()
 	update_player()
+	update_bordure()
 	update_life()
  update_bullets()
  update_stars()
@@ -32,6 +35,12 @@ function update_game()
 	end
  update_enemies()
  update_explosions()
+ update_boss()
+ if score==300 then
+		spawn_boss(1)	
+	end
+	delete_enemies()
+	update_bombs()
 end
 
 function draw_game()
@@ -56,12 +65,15 @@ function draw_game()
 	for i in all(bullets) do
 		spr(129,i.x,i.y)
  end
- --score
- --print("texte",x,y,couleur)
- print("score:\n"..score,2,2,11)
+ for b in all (boss) do
+		spr(68,b.x,b.y,4,4,false,true)
 	end
-	
-	
+	for b in all(boss_bombs) do
+		spr(73,b.x,b.y)
+ end
+ --score
+ print("score:\n"..score,2,2,11)
+end
 -->8
 --bullets
 
@@ -134,10 +146,9 @@ function spawn_enemies(nombre)
 end
 
 function update_enemies()
-	for e in all(enemies) do
--- if e.y < 30 then	
+	for e in all(enemies) do	
 		e.y+=0.5
-		if e.y > 128 then 
+		if e.y > 130 then 
 			del(enemies,e)
 		end
 		--collision
@@ -154,6 +165,14 @@ function update_enemies()
 		end
 	end
 end
+
+function delete_enemies()
+	for e in all(enemies) do	
+		if score==300 then
+			del(enemies,e)
+		end
+	end
+end		
 -->8
 --collisions
 function collision(a,b)
@@ -166,6 +185,7 @@ function collision(a,b)
 		return true
 	end
 end
+
 -->8
 --explosions	
 function create_explosion(x,y)
@@ -183,13 +203,14 @@ function update_explosions()
 end
 
 function draw_explosions()
-	circ(x,y,rayon,couleur)
+	--circ(x,y,rayon,couleur)
 	
 	for e in all(explosions) do
 		circ(e.x,e.y,e.timer/3,
 							8+e.timer%3)
 	end
 end
+
 -->8
 --player
 
@@ -199,12 +220,21 @@ function update_player()
  if (btn(⬆️)) p.y-=p.speed
  if (btn(⬇️)) p.y+=p.speed
  if (btnp(❎)) shoot()
+end 
+ 
+function update_bordure()
+	if p.x < 0 then 
+		p.x=1
+	end
+	if p.x > 127 then
+		p.x=110
+	end
  
  for e in all(enemies) do
  	if collision(e,p) then
  		state=1
+ 		end
  	end
- end	
 end
 
 
@@ -246,6 +276,60 @@ function draw_life()
 		spr(life_empty_sprite,life_empty_x,life_empty_y)
 
 end
+-->8
+--boss
+
+function spawn_boss(nombre)
+	gap=(104-32*nombre)/(nombre+1)
+	for i=1,nombre do
+		new_boss={
+			x=gap*i+32*(i-1),
+			y=-1,
+			life=2,
+		shoot_timer=0
+		}
+		add(boss,new_boss)
+	end	
+end
+
+function update_boss()
+	for b in all(boss) do
+		if b.y<15 then
+			b.y+=0.5
+		end		
+		new_boss.shoot_timer+=1
+		if new_boss.shoot_timer==120 then
+			shoot_boss(new_boss)
+			new_boss.shoot_timer=0
+		end
+	end	
+end
+
+--shoot_boss
+function angle_to(x1,y1,x2,y2)
+	return atan2(y2-y1,x2-x1)+0.25
+end	
+
+function shoot_boss(boss)
+	local angle=angle_to(boss.x,boss.y,p.x,p.y)
+	local new_bomb={
+		x=boss.x+2, y=boss.y+5,
+		w=4, h=5,
+		speed=2,
+		dx=cos(angle),
+		dy=-sin(angle)
+	}
+	add(boss_bombs,new_bomb)
+end
+
+function update_bombs()
+	for b in all (boss_bombs) do
+		b.x+=b.dx*b.speed
+		b.y+=b.dy*b.speed
+		if (b.y>128) del(boss_bombs,b)
+	end
+end
+
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
@@ -343,9 +427,6 @@ d111111d0000000010005001006660d0770dd0703000000305959590a555555a0789877005898550
 44000044044444404540004406000060008000800088808000888880000000000000000000000000000000000000000000000000000000000000000000000000
 44000044044444404440004406000060000808000008880000088800000000000000000000000000000000000000000000000000000000000000000000000000
 44000044044444404540004406666660000080000000800000008000000000000000000000000000000000000000000000000000000000000000000000000000
-__map__
-00000000000000000000000000b6b6b600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000b6b6b600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __sfx__
 000100002b5502e550275501d55016550115500952004520000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000300002365021650316503064030620216000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
