@@ -8,6 +8,7 @@ function _init()
 	scene="menu"
 	message_display=false
 	grogu_taken=false
+	grogu_follow=false
 	x=0
 	y=0
 	p={
@@ -25,8 +26,6 @@ function _init()
 		sprite=64
 	}
 	init_msg()
-	create_msg("alop:",
-		"me voila sur place\nbon ou est grogu?")
 	init_camera()
 	create_player()
 	create_grogu()
@@ -38,6 +37,8 @@ function _update60()
 	elseif scene=="adventure" then
 		update_adventure()
 		update_msg()
+	elseif scene=="entracte" then
+		update_entracte()
 	end
 end
 
@@ -46,6 +47,9 @@ function _draw()
 		draw_menu()
 	elseif scene=="adventure" then
 		draw_adventure()
+	elseif scene=="entracte" then
+		draw_entracte()
+
 	end
 end
 -->8
@@ -57,10 +61,17 @@ function update_menu()
 end
 function update_adventure()
 	update_camera()
-	update_msg()
+	grogu_movement()
 	player_movement()
 	interact()
-	grogu_movement()
+	update_msg()
+	timer_count()
+end
+
+function update_entracte()
+	--if btnp(❎) then
+		--scene="shooter"
+	--end
 end
 -->8
 --draw global--
@@ -77,6 +88,16 @@ function draw_adventure()
 	draw_grogu()
 	draw_ui()
 	draw_msg()
+	draw_timer()
+	draw_gameover()
+end
+
+function draw_entracte()
+	cls()
+	print("vous avez reussi a vous echapper",1,40)
+	print("du vaisseau de Jabba")
+	print("detruisez la flotte adverse")
+	print("press❎ to start")
 end
 -->8
 --player--
@@ -96,14 +117,14 @@ end
 
 function create_grogu()
 	g={
-		x=10, y=11,
+		x=125, y=7,
 		sprite=64
 	}
 end
 
 function player_movement()
-	newx=p.x
-	newy=p.y
+	local newx=p.x
+	local newy=p.y
 	if p.anim_t==0 and message_display==false then
 		if btn(➡️) then 
 			newx+=1
@@ -154,20 +175,26 @@ function player_movement()
 end
 
 function grogu_movement()
-	gx=g.x
-	gy=g.y
+	local gx=g.x
+	local gy=g.y
 	if grogu_taken==true then
 		if btn(➡️) then 
 			gx=p.x-1
+			gy=p.y
 			g.flip=false
 		elseif btn(⬅️) then
 			gx=p.x+1
+			gy=p.y
 			g.flip=true
 		elseif btn(⬇️) then
 			gy=p.y-1
+			gx=p.x
 		elseif btn(⬆️) then
 			gy=p.y+1
+			gx=p.x
 		end
+	g.x=gx
+	g.y=gy
 	end
 end
 
@@ -177,6 +204,7 @@ function interact(x,y)
 	elseif check_flag(2,x,y)
 	and p.keys1>0 then
 		open_door1(x,y)
+		sfx(10)
 	elseif check_flag(2,x,y)
 	and p.keys1<=0 then
 		sfx(3) 
@@ -186,6 +214,7 @@ function interact(x,y)
 	elseif check_flag(4,x,y)
 	and p.keys2>0 then
 		open_door2(x,y) 
+		sfx(10)
 	elseif check_flag(4,x,y)
 	and p.keys2<=0 then
 		sfx(3) 
@@ -195,15 +224,24 @@ function interact(x,y)
 	elseif check_flag(6,x,y)
 	and p.keys3>0 then
 		open_door3(x,y) 
+		sfx(10)
 	elseif check_flag(6,x,y)
 	and p.keys3<=0 then
 		sfx(3)
 	end
-	if x==9 and y==11
+	if x==124 and y==7
 	and not grogu_taken then
-		create_msg("alop :",
-		"voila les secours!\nsuis moi petit grogu!")
-	grogu_taken=true
+		if grogu_follow==true and message_display==false then
+			create_msg("alarme", "les renforts arrivent")
+			grogu_taken=true
+				if grogu_taken==true then
+					sfx(5)
+				end
+		else
+			create_msg("alop :",
+			"voila les secours!\nsuis moi petit grogu!")
+			grogu_follow=true
+		end
 	end
 	if x==33 and y==7 
 	and not visited_greedo then
@@ -213,18 +251,23 @@ function interact(x,y)
 	end
 	if x==81 and y==7 
 	and not visited_boba then
-			create_msg("boba",
-			"te voila alop!la prime\npour ta tete est elevee...","et cette prime est pour moi!\nprepare toi!","tu vas mordre la poussiere!")
-	visited_boba=true
+		create_msg("boba",
+		"te voila alop!la prime\npour ta tete est elevee...","et cette prime est pour moi!\nprepare toi!","tu vas mordre la poussiere!")
+		visited_boba=true
+	end
 	if x==8 and y==11 
 	and not visited_intro then
 		create_msg("alop:",
 		"me voila sur place\nbon ou est grogu?")
-	visited_intro=true
+		visited_intro=true
 	end
-	end
+		if x==7 and y==11 and
+		grogu_taken then
+			scene="entracte"
+			sfx(-2)
+		end
 end
-
+ 
 function draw_player()
 	spr(p.sprite,p.x*8+p.ox,p.y*8+p.oy,
 	1,1,p.flip)
@@ -304,18 +347,30 @@ function open_door3(x,y)
 	p.keys3-=1
 end
 -->8
---textes--
-function grogu(x,y)
-	if x==20 and y==5 then
-		create_msg("grogu",
-		"sauve moi !\nj'ai peur au secours")		
+--timer--
+timer = 30
+counter = 0
+
+function timer_count()
+	if grogu_taken==true then
+		counter = 1/60 --60 car 60fps
+		timer -= counter
+		if flr(timer) == 0 then
+			timer = counter
+		end
 	end
 end
-
-function greedo(x,y)
-	if x==23 and y==13 then
-		create_msg("greedo",
-		"ahah grogu est la\na moi la prime")
+function draw_timer()
+	if grogu_taken==true then
+		local timer_formate = timer
+		rectfill(79,0,128,8,8)
+		print("time " .. timer_formate,80,2,7)
+	end
+end
+function draw_gameover()
+	if flr(timer) == 0 then
+		cls()
+		print("jabba vous a capture de nouveau!",2,40)
 	end
 end
 
@@ -359,13 +414,12 @@ end
 
 function update_msg()
 	if (btnp(❎)) then
-		deli(messages,1)
 		message_display=false
 	end
 end
 
 function draw_msg()
-	if messages[1] then
+	if message_display and messages[1] then
 		local y=100
 		if p.y%16>9 then
 			y=20
@@ -531,4 +585,5 @@ __sfx__
 001000003005330053300533005330053300533005330053000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000300000f3110f321103411235114361173711a3711e36122361263512a3512e3312f33100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000800001467014670146601464014630146201461014610146001460000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-010a00002d0552d055000001800018000000000000000000180551805500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000a00002d0552d055000001800018000000000000000000180551805500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00060000096720d6720f662146521a632206222a6122c602326000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
