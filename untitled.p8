@@ -13,9 +13,9 @@ function _update()
 	if frog_x > 128 then
 		frog_x=-8
 	end
-	if frog_y > 128 then
-		frog_y=-8
-	end	
+--	if frog_y > 128 then
+		--frog_y=-8
+--	end	
 	
 	if time() - frog_anim_time > frog_anim_wait then
 			frog_sprite+=1
