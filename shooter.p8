@@ -36,17 +36,17 @@ function update_game()
  	update_bullets()
  	update_stars()
  	if #enemies==0 then
- 		spawn_enemies(2+ceil(rnd(3))) 		
+ 		spawn_enemies(2+ceil(rnd(3)))
 	end
  	update_enemies()
  	update_explosions()
  	update_boss()
  	if #boss==0 and score==1500 then
 			spawn_boss()
-		else--fonctionne	
+		else--fonctionne
 	end
-	update_bombs()	
-	update_explosions_boss()	
+	update_bombs()
+	update_explosions_boss()
 	delete_enemies()
 end
 
@@ -66,7 +66,7 @@ function draw_game()
 		else
 			spr(215,128 - i*8,0)
 		end
-	end			
+	end
 	--enemis
 	for e in all (enemies) do
 		spr(231,e.x,e.y,1,1,true,true)
@@ -105,9 +105,9 @@ end
 function update_bullets()
 	for b in all(bullets) do
 		b.y-=b.speed
-		if b.y<-8 then 
+		if b.y<-8 then
 			del(bullets,b)
-		end	
+		end
 	end
 end
 -->8
@@ -124,7 +124,7 @@ function create_stars()
 		}
 		add(stars,new_star)
 	end
-		
+
 	for i=1,9 do
 		new_star={
 			x=rnd(128),
@@ -142,8 +142,8 @@ function update_stars()
 		if s.y > 128 then
 			s.y=0
 			s.x=rnd(128)
-		end	
-	end	
+		end
+	end
 end
 -->8
 --enemies
@@ -161,9 +161,9 @@ function spawn_enemies(nombre)
 end
 
 function update_enemies()
-	for e in all(enemies) do	
+	for e in all(enemies) do
 		e.y+=0.5
-		if e.y > 130 then 
+		if e.y > 130 then
 			del(enemies,e)
 		end
 		--collision
@@ -172,7 +172,7 @@ function update_enemies()
 				create_explosion(b.x,b.y)
 				del(bullets,b)
 				e.life-=1
-				if e.life==0 then 
+				if e.life==0 then
 				del(enemies,e)
 				score+=100
 				end
@@ -182,19 +182,19 @@ function update_enemies()
 end
 
 function delete_enemies()
-	for e in all(enemies) do	
+	for e in all(enemies) do
 		if score==1500 then
 			del(enemies,e)
 		end
 	end
-end		
+end
 -->8
 --collisions
 function collision(a,b)
-	if a.x>b.x+8 
+	if a.x>b.x+8
 	or a.y>b.y+8
 	or a.x+8<b.x
-	or a.y+8<b.y then 
+	or a.y+8<b.y then
 		return false
 	else
 		return true
@@ -202,7 +202,7 @@ function collision(a,b)
 end
 
 -->8
---explosions	
+--explosions
 function create_explosion(x,y)
 	--sfx(1)
 	add(explosions,{x=x,y=y,timer=0})
@@ -219,7 +219,7 @@ end
 
 function draw_explosions()
 	--circ(x,y,rayon,couleur)
-	
+
 	for e in all(explosions) do
 		circ(e.x,e.y,e.timer/3,8+e.timer%3)
 	end
@@ -240,22 +240,22 @@ function update_lovelace()
  		l.life-=1
  		create_explosion(e.x+1.5,e.y+4)
  		del(enemies,e)
- 	end	
+ 	end
 end
-	
+
 	for b in all(new_boss_bombs) do
 		if collision(b,l) then
 			l.life-=1
 			create_explosion(b.x+1.5,b.y+4)
 			del(new_boss_bombs,b)
-		end	
+		end
 	end
-	
+
 	if(l.life<=0) state=1
 end
- 
+
 function update_bordure()
-	if l.x < 0 then 
+	if l.x < 0 then
 		l.x=1
 	end
 	if l.x > 127 then
@@ -265,7 +265,7 @@ end
 -->8
 --game over
 function update_gameover()
-	if (btn(🅾️)) update_shooter()
+	if (btn(🅾️)) update_game()
 end
 
 function draw_gameover()
@@ -286,7 +286,7 @@ function spawn_boss()
 			speed=0.5,
 		shoot_timer=0
 		}
-		add(boss,new_boss)	
+		add(boss,new_boss)
 end --fonctionne
 
 function update_boss()
@@ -297,7 +297,7 @@ function update_boss()
 	--collision
 	for b in all(bullets) do
 		if collision_boss(new_boss,b) then
-			create_explosion_boss(b.x+1.5,b.y+3)	
+			create_explosion_boss(b.x+1.5,b.y+3)
 			del (bullets,b)
 			new_boss.life-=1
 			if new_boss.life<=0 then
@@ -305,19 +305,19 @@ function update_boss()
 				end
 		end
 	end
-				
+
 		new_boss.shoot_timer+=1
 		if new_boss.shoot_timer==60 then
 			shoot_boss(new_boss)
 			new_boss.shoot_timer=0
 		end
-	end	
+	end
 end
 
 --shoot_boss
 function angle_to(x1,y1,x2,y2)
 	return atan2(y2-y1,x2-x1)+0.25
-end	
+end
 
 function shoot_boss(new_boss)
 	local angle=angle_to(new_boss.x,new_boss.y,l.x,l.y)
@@ -342,17 +342,17 @@ end
 -->8
 --collisions  explosion boss
 function collision_boss(a,b)
-	if a.x>b.x+32 
+	if a.x>b.x+32
 	or a.y>b.y+32
 	or a.x+32<b.x
-	or a.y+32<b.y then 
+	or a.y+32<b.y then
 		return false
 	else
 		return true
 	end
 end
 
---explosions	
+--explosions
 function create_explosion_boss(x,y)
 	--sfx(1)
 	add(explosions_boss,{x=x,y=y,timer=0})
@@ -369,7 +369,7 @@ end
 
 function draw_explosions_boss()
 	--circ(x,y,rayon,couleur)
-	
+
 	for boum in all(explosions_boss) do
 		circ(boum.x,boum.y,boum.timer/3,8+boum.timer%3)
 	end
@@ -381,9 +381,9 @@ function draw_victory()
 	cls(13)
 	print("bravo alop!\nvous avez sauve grogu",20,80,0)
 	print(spr(96,40,52),spr(97,49,52),spr(98,58,52),spr(99,67,52))
-	stop()							
-end	
-		
+	stop()
+end
+
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

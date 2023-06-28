@@ -100,17 +100,17 @@ function update_game()
  	update_bullets()
  	update_stars()
  	if #enemies==0 then
- 		spawn_enemies(2+ceil(rnd(3))) 		
+ 		spawn_enemies(2+ceil(rnd(3)))
 	end
  	update_enemies()
  	update_explosions()
  	update_boss()
  	if #boss==0 and score==1500 then
 			spawn_boss()
-		else--fonctionne	
+		else--fonctionne
 	end
-	update_bombs()	
-	update_explosions_boss()	
+	update_bombs()
+	update_explosions_boss()
 	delete_enemies()
 end
 -->8
@@ -159,7 +159,7 @@ function draw_game()
 		else
 			spr(215,128 - i*8,0)
 		end
-	end			
+	end
 	--enemis
 for e in all (enemies) do
 	spr(231,e.x,e.y,1,1,true,true)
@@ -192,15 +192,15 @@ function shoot()
 	speed=6
 	}
 	add(bullets,new_bullet)
-	--sfx(0)
+	sfx(6)
 end
 
 function update_bullets()
 	for b in all(bullets) do
 		b.y-=b.speed
-		if b.y<-8 then 
+		if b.y<-8 then
 			del(bullets,b)
-		end	
+		end
 	end
 end
 -->8
@@ -217,7 +217,7 @@ function create_stars()
 		}
 		add(stars,new_star)
 	end
-		
+
 	for i=1,9 do
 		new_star={
 			x=rnd(128),
@@ -235,8 +235,8 @@ function update_stars()
 		if s.y > 128 then
 			s.y=0
 			s.x=rnd(128)
-		end	
-	end	
+		end
+	end
 end
 -->8
 --enemies
@@ -254,9 +254,9 @@ function spawn_enemies(nombre)
 end
 
 function update_enemies()
-	for e in all(enemies) do	
+	for e in all(enemies) do
 		e.y+=0.5
-		if e.y > 130 then 
+		if e.y > 130 then
 			del(enemies,e)
 		end
 		--collision
@@ -265,7 +265,7 @@ function update_enemies()
 				create_explosion(b.x,b.y)
 				del(bullets,b)
 				e.life-=1
-				if e.life==0 then 
+				if e.life==0 then
 				del(enemies,e)
 				score+=100
 				end
@@ -275,7 +275,7 @@ function update_enemies()
 end
 
 function delete_enemies()
-	for e in all(enemies) do	
+	for e in all(enemies) do
 		if score==1500 then
 			del(enemies,e)
 		end
@@ -284,18 +284,18 @@ end
 -->8
 --collisions
 function collision(a,b)
-	if a.x>b.x+8 
+	if a.x>b.x+8
 	or a.y>b.y+8
 	or a.x+8<b.x
-	or a.y+8<b.y then 
+	or a.y+8<b.y then
 		return false
 	else
 		return true
 	end
 end
---explosions	
+--explosions
 function create_explosion(x,y)
-	--sfx(1)
+	sfx(4)
 	add(explosions,{x=x,y=y,timer=0})
 end
 
@@ -310,7 +310,7 @@ end
 
 function draw_explosions()
 	--circ(x,y,rayon,couleur)
-	
+
 	for e in all(explosions) do
 		circ(e.x,e.y,e.timer/3,8+e.timer%3)
 	end
@@ -340,7 +340,7 @@ function player_movement()
 	local newx=p.x
 	local newy=p.y
 	if p.anim_t==0 and message_display==false then
-		if btn(➡️) then 
+		if btn(➡️) then
 			newx+=1
 			newox=-8
 			newoy=0
@@ -360,9 +360,9 @@ function player_movement()
 			newox=0
 		end
 	end
-	
-	interact(newx,newy)	
-	
+
+	interact(newx,newy)
+
 	if not check_flag(0,newx,newy)
 	and (p.x!=newx or p.y!=newy)
 	and (newx!=g.x or newy!=g.y) then
@@ -372,12 +372,12 @@ function player_movement()
 		p.start_oy=newoy
 		p.anim_t=1
 	end
-	
+
 	--animation
 	p.anim_t=max(p.anim_t-0.125,0)
 	p.ox=p.start_ox*p.anim_t
 	p.oy=p.start_oy*p.anim_t
-	
+
 		if p.anim_t>=0.5 then
 			p.sprite=80
 		else
@@ -392,7 +392,7 @@ function grogu_movement()
 	local gx=g.x
 	local gy=g.y
 	if grogu_taken==true then
-		if btn(➡️) then 
+		if btn(➡️) then
 			gx=p.x-1
 			gy=p.y
 			g.flip=false
@@ -421,23 +421,25 @@ function interact(x,y)
 		sfx(10)
 	elseif check_flag(2,x,y)
 	and p.keys1<=0 then
-		sfx(3) 
-	end
+    sfx(3)
+    create_msg("alop",
+    "tu as peut etre oublie\nde prendre une cle!")
+  end
 	if check_flag(3,x,y) then
 		pick_up_key2(x,y)
 	elseif check_flag(4,x,y)
 	and p.keys2>0 then
-		open_door2(x,y) 
+		open_door2(x,y)
 		sfx(10)
 	elseif check_flag(4,x,y)
 	and p.keys2<=0 then
-		sfx(3) 
+		sfx(3)
 	end
 	if check_flag(5,x,y) then
 		pick_up_key3(x,y)
 	elseif check_flag(6,x,y)
 	and p.keys3>0 then
-		open_door3(x,y) 
+		open_door3(x,y)
 		sfx(10)
 	elseif check_flag(6,x,y)
 	and p.keys3<=0 then
@@ -457,19 +459,19 @@ function interact(x,y)
 			grogu_follow=true
 		end
 	end
-	if x==33 and y==7 
+	if x==33 and y==7
 	and not visited_greedo then
 			create_msg("greedo",
 			"un intru! c'est toi alop...\ntu n'auras jamais grogu!","tu vas tater de mon blaster!")
 	visited_greedo=true
 	end
-	if x==81 and y==7 
+	if x==81 and y==7
 	and not visited_boba then
 		create_msg("boba",
 		"te voila alop!la prime\npour ta tete est elevee...","et cette prime est pour moi!\nprepare toi!","tu vas mordre la poussiere!")
 		visited_boba=true
 	end
-	if x==8 and y==11 
+	if x==8 and y==11
 	and not visited_intro then
 		create_msg("alop:",
 		"me voila sur place\nbon ou est grogu?")
@@ -480,8 +482,20 @@ function interact(x,y)
 			scene="entracte"
 			sfx(-2)
 		end
+    if x==121 and y==3 or x==119 and y==004 or x==120 and y==004 or x==121 and y==004 then
+      create_msg("Jabba !",
+      "Ah'chuba da naga ?\nKee baatu baatu !!!")
+    end
+    if x==70 and y==3 or x==71 and y==3 or x==72 and y==3 or x==71 and y==2 or x==72 and y==2 or
+    x==100 and y==3 or x==101 and y==3 or x==99 and y==4 or x==100 and y==4 or x==101 and y==4 or
+    x==107 and y==3 or x==108 and y==3 or x==106 and y==4 or x==107 and y==4 or x==108 and y==4 or
+    x==100 and y==10 or x==101 and y==10 or x==99 and y==11 or x==100 and y==11 or x==101 and y==11 or
+    x==107 and y==10 or x==108 and y==10 or x==106 and y==11 or x==107 and y==11 or x==108 and y==11 then
+      create_msg("alop !",
+      "une statue en or de Jabba!\nil a zero humilite...")
+    end
 end
- 
+
 function draw_player()
 	spr(p.sprite,p.x*8+p.ox,p.y*8+p.oy,
 	1,1,p.flip)
@@ -499,28 +513,28 @@ function update_lovelace()
 	if (btn(⬆️)) l.y-=l.speed
 	if (btn(⬇️)) l.y+=l.speed
 	if (btnp(❎)) shoot()
-   
+
 	for e in all(enemies) do
 		if  collision(e,l) then
 			l.life-=1
 			create_explosion(e.x+1.5,e.y+4)
 			del(enemies,e)
-		end	
+		end
    end
-	   
+
 	   for b in all(new_boss_bombs) do
 		   if collision(b,l) then
 			   l.life-=1
 			   create_explosion(b.x+1.5,b.y+4)
 			   del(new_boss_bombs,b)
-		   end	
+		   end
 	   end
-	   
+
 	   if(l.life<=0) state=1
    end
-	
+
    function update_bordure()
-	   if l.x < 0 then 
+	   if l.x < 0 then
 		   l.x=1
 	   end
 	   if l.x > 127 then
@@ -548,7 +562,7 @@ function spawn_boss()
 	speed=0.5,
 shoot_timer=0
 }
-add(boss,new_boss)	
+add(boss,new_boss)
 end --fonctionne
 
 function update_boss()
@@ -559,7 +573,7 @@ end
 --collision
 for b in all(bullets) do
 if collision_boss(new_boss,b) then
-	create_explosion_boss(b.x+1.5,b.y+3)	
+	create_explosion_boss(b.x+1.5,b.y+3)
 	del (bullets,b)
 	new_boss.life-=1
 	if new_boss.life<=0 then
@@ -567,19 +581,19 @@ if collision_boss(new_boss,b) then
 		end
 end
 end
-		
+
 new_boss.shoot_timer+=1
 if new_boss.shoot_timer==60 then
 	shoot_boss(new_boss)
 	new_boss.shoot_timer=0
 end
-end	
+end
 end
 
 --shoot_boss
 function angle_to(x1,y1,x2,y2)
 return atan2(y2-y1,x2-x1)+0.25
-end	
+end
 
 function shoot_boss(new_boss)
 	local angle=angle_to(new_boss.x,new_boss.y,l.x,l.y)
@@ -602,19 +616,19 @@ function update_bombs()
 end
 --collisions  explosion boss
 function collision_boss(a,b)
-	if a.x>b.x+32 
+	if a.x>b.x+32
 	or a.y>b.y+32
 	or a.x+32<b.x
-	or a.y+32<b.y then 
+	or a.y+32<b.y then
 		return false
 	else
 		return true
 	end
 end
 
---explosions	
+--explosions
 function create_explosion_boss(x,y)
-	--sfx(1)
+	sfx(4)
 	add(explosions_boss,{x=x,y=y,timer=0})
 end
 
@@ -629,7 +643,7 @@ end
 
 function draw_explosions_boss()
 	--circ(x,y,rayon,couleur)
-	
+
 	for boum in all(explosions_boss) do
 		circ(boum.x,boum.y,boum.timer/3,8+boum.timer%3)
 	end
@@ -640,8 +654,8 @@ function draw_victory()
 	cls(13)
 	print("bravo alop!\nvous avez sauve grogu",20,80,0)
 	print(spr(96,40,52),spr(97,49,52),spr(98,58,52),spr(99,67,52))
-	stop()							
-end	
+	stop()
+end
 -->8
 --stars
 function create_stars()
@@ -655,7 +669,7 @@ function create_stars()
 		}
 		add(stars,new_star)
 	end
-		
+
 	for i=1,9 do
 		new_star={
 			x=rnd(128),
@@ -673,9 +687,9 @@ function update_stars()
 		if s.y > 128 then
 			s.y=0
 			s.x=rnd(128)
-		end	
-	end	
-end	
+		end
+	end
+end
 -->8
 --map--
 
@@ -691,19 +705,19 @@ end
 function update_camera()
 	sectionx=flr(p.x/16)*16
 	sectiony=flr(p.y/16)*16
-	
+
 	destx=sectionx*8
 	desty=sectiony*8
-	
+
 	diffx=destx-camx
 	diffy=desty-camy
-	
+
 	diffx/=8
 	diffy/=8
-	
+
 	camx+=diffx
 	camy+=diffy
-	
+
 	camera(camx,camy)
 end
 
@@ -793,7 +807,7 @@ function print_outline(text,x,y)
 	print(text,x+1,y,0)
 	print(text,x,y-1,0)
 	print(text,x,y+1,0)
-	print(text,x,y,7)	
+	print(text,x,y,7)
 end
 -->8
 --message--
@@ -821,7 +835,7 @@ function draw_msg()
 		local y=100
 		if p.y%16>9 then
 			y=20
-		end 
+		end
 		rectfill(1,y+8,126,y+22,10)
 		rectfill(2,y+9,125,y+21,4)
 		print(messages[1],4,y+10,7)
@@ -830,7 +844,7 @@ function draw_msg()
 		rectfill(2,y+2,
 		3+#msg_title*4,y+8,4)
 		print(msg_title,4,y+3,7)
-	end	
+	end
 end
 __gfx__
 0000000077777777575757577777777777777777777775555555555577777777cccccccc565115655551155556565656111111115555555577777777cccccccc
@@ -1004,7 +1018,7 @@ __sfx__
 000f00001905018050150500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000300002965025650216501c6401a6401464013630116300f6300c62009620076200661000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000c0011240142601428034290442b0542d0642f06424074260642806425064270642a0542c0342e0242401426014000000000000000000000000000000000000000000000000000000000000000000000000000
-001000003005330053300533005330053300533005330053000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000003005330003300033000330003300033000330003000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000300000f3110f321103411235114361173711a3711e36122361263512a3512e3312f33100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000800001467014670146601464014630146201461014610146001460000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000a00002d0552d055000001800018000000000000000000180551805500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
