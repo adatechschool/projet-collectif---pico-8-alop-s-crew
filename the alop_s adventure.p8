@@ -29,21 +29,7 @@ function _init()
 	init_camera()
 	create_player()
 	create_grogu()
-	l={
-		x=60,y=90,
-		w=32,h=32,
-		speed=2,life=6
-	}
-	totallife=l.life
-	bullets={}
-	enemies={}
-	explosions={}
-	create_stars()
-	boss={}
-	new_boss_bombs={}
-	score=0
-	state=0
-	explosions_boss={}
+	init_shooter()
 end
 
 function _update60()
@@ -181,6 +167,7 @@ end
 end
  --score
 print("score:\n"..score,2,2,11)
+
 end
 -->8
 --bullets
@@ -507,6 +494,24 @@ function draw_grogu()
 end
 --player_lovelace
 
+function init_shooter()
+	l={
+		x=60,y=90,
+		w=32,h=32,
+		speed=2,life=6
+	}
+	totallife=l.life
+	bullets={}
+	enemies={}
+	explosions={}
+	create_stars()
+	boss={}
+	new_boss_bombs={}
+	score=0
+	state=0
+	explosions_boss={}
+end
+
 function update_lovelace()
 	if (btn(➡️)) l.x+=l.speed
 	if (btn(⬅️)) l.x-=l.speed
@@ -544,7 +549,7 @@ function update_lovelace()
 -->8
 --game over-boss
 function update_gameover_shooter()
-	if (btn(🅾️)) _init()
+	if (btn(🅾️)) init_shooter()
 end
 
 function draw_gameover_shooter()
@@ -578,7 +583,7 @@ if collision_boss(new_boss,b) then
 	new_boss.life-=1
 	if new_boss.life<=0 then
 	state=2
-		end
+	end
 end
 end
 
@@ -651,11 +656,16 @@ end
 -->8
 --victory
 function draw_victory()
-	cls(13)
-	print("bravo alop!\nvous avez sauve grogu",20,80,0)
+	cls(0)
+	print("bravo alop! \nvous avez sauve grogu",20,80,7)
 	print(spr(96,40,52),spr(97,49,52),spr(98,58,52),spr(99,67,52))
+<<<<<<< HEAD
 	stop()
 end
+=======
+	stop()					
+end	
+>>>>>>> 08d9577497408186fd2210388b5ec1efc88d823c
 -->8
 --stars
 function create_stars()
@@ -902,7 +912,7 @@ __gfx__
 99777790442222400011110000777700a888888a777aaa66777aaa66aaaa99aa99aa9aaaa888888a3333444ffff44333777666669999aaa7777aa99900000000
 9f7777f00f2222f00f1111f00f7777f08a8888a87779ab667779ab669aaac9aaa9aaaa998a88333333334f4444443333666699999999a7aaaaaa999900000000
 9011110000222200004444000044440088a88a8877ac99a677a899a699aaa99aa9a8aaa9833334444444fffff444333869999aaaaaaa77777aaa999600000000
-0010010000d00d000040040000400400aa8888aa6a9a9aa96a9a9ea9a9aaaaaaa99aaaa9334444ffffffffff444338aa99aaaa7777777777aaa9966600000000
+0010010000e00e000040040000400400aa8888aa6a9a9aa96a9a9ea9a9aaaaaaa99aaaa9334444ffffffffff444338aa99aaaa7777777777aaa9966600000000
 11111111111111111111111111111111777755555555777777777777777777777777777777777777000000000000000000000000000000000000000000000000
 11111a111111111111111111111111117777585bb5857776aaaa777677777776aaaa777677777776000000000000000000000000000000000000000000000000
 111111111111111111171111111111117777555555557776a78aaaaa77777776a72aaaaa77777776000000000000000000000000000000000000000000000000
