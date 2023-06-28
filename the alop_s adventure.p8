@@ -92,7 +92,26 @@ function update_entracte()
 end
 function update_shooter()
 	if (state==0) update_game()
-	if (state==1) update_gameover()
+	if (state==1) update_gameover_shooter()
+end
+function update_game()
+	update_lovelace()
+	update_bordure()
+ 	update_bullets()
+ 	update_stars()
+ 	if #enemies==0 then
+ 		spawn_enemies(2+ceil(rnd(3))) 		
+	end
+ 	update_enemies()
+ 	update_explosions()
+ 	update_boss()
+ 	if #boss==0 and score==1500 then
+			spawn_boss()
+		else--fonctionne	
+	end
+	update_bombs()	
+	update_explosions_boss()	
+	delete_enemies()
 end
 -->8
 --draw global--
@@ -121,9 +140,182 @@ function draw_entracte()
 end
 function draw_shooter()
 	if (state==0) draw_game()
-	if (state==1) draw_gameover()
+	if (state==1) draw_gameover_shooter()
 	if (state==2) draw_victory()
 end
+function draw_game()
+	cls()
+ --stars
+ for s in all(stars) do
+ 	pset(s.x,s.y,s.col)
+ end
+	--affichage vaisseau
+	spr(44,l.x,l.y,2,2)
+	--hud interface
+		--draw heart
+	for i=1, totallife do
+		if (totallife-l.life>=i) then
+			spr(214,128 - i*8,0)
+		else
+			spr(215,128 - i*8,0)
+		end
+	end			
+	--enemis
+for e in all (enemies) do
+	spr(231,e.x,e.y,1,1,true,true)
+end
+	--explosions
+draw_explosions()
+	--affichage bullets
+for i in all(bullets) do
+		spr(247,i.x,i.y)
+end
+for b in all (boss) do
+	spr(201,b.x,b.y,4,4,false,true)
+end
+	--explosions boss
+	draw_explosions_boss()
+	--boss_bombs
+	for new_bomb in all(new_boss_bombs) do
+		spr(216,new_bomb.x,new_bomb.y)
+end
+ --score
+print("score:\n"..score,2,2,11)
+end
+-->8
+--bullets
+
+function shoot()
+	new_bullet={
+	x=l.x,
+	y=l.y,
+	speed=6
+	}
+	add(bullets,new_bullet)
+	--sfx(0)
+end
+
+function update_bullets()
+	for b in all(bullets) do
+		b.y-=b.speed
+		if b.y<-8 then 
+			del(bullets,b)
+		end	
+	end
+end
+-->8
+--stars
+
+function create_stars()
+	stars={}
+	for i=1,14 do
+		new_star={
+			x=rnd(128),
+			y=rnd(128),
+			col=1,
+			speed=0.5+rnd(0.5)
+		}
+		add(stars,new_star)
+	end
+		
+	for i=1,9 do
+		new_star={
+			x=rnd(128),
+			y=rnd(128),
+			col=rnd({10,14,15}),
+			speed=2+rnd(2)
+		}
+		add(stars,new_star)
+		end
+end
+
+function update_stars()
+	for s in all(stars) do
+		s.y+=s.speed
+		if s.y > 128 then
+			s.y=0
+			s.x=rnd(128)
+		end	
+	end	
+end
+-->8
+--enemies
+
+function spawn_enemies(nombre)
+	gap=(128-8*nombre)/(nombre+1)
+	for i=1,nombre do
+		new_enemy={
+			x=gap*i+8*(i-1),
+			y=-20,
+			life=2
+		}
+		add(enemies,new_enemy)
+	end
+end
+
+function update_enemies()
+	for e in all(enemies) do	
+		e.y+=0.5
+		if e.y > 130 then 
+			del(enemies,e)
+		end
+		--collision
+		for b in all (bullets) do
+			if collision(e,b) then
+				create_explosion(b.x,b.y)
+				del(bullets,b)
+				e.life-=1
+				if e.life==0 then 
+				del(enemies,e)
+				score+=100
+				end
+			end
+		end
+	end
+end
+
+function delete_enemies()
+	for e in all(enemies) do	
+		if score==1500 then
+			del(enemies,e)
+		end
+	end
+end
+-->8
+--collisions
+function collision(a,b)
+	if a.x>b.x+8 
+	or a.y>b.y+8
+	or a.x+8<b.x
+	or a.y+8<b.y then 
+		return false
+	else
+		return true
+	end
+end
+--explosions	
+function create_explosion(x,y)
+	--sfx(1)
+	add(explosions,{x=x,y=y,timer=0})
+end
+
+function update_explosions()
+	for e in all(explosions) do
+		e.timer+=1
+		if e.timer==13 then
+			del(explosions,e)
+		end
+	end
+end
+
+function draw_explosions()
+	--circ(x,y,rayon,couleur)
+	
+	for e in all(explosions) do
+		circ(e.x,e.y,e.timer/3,8+e.timer%3)
+	end
+end
+
 -->8
 --player--
 function create_player()
@@ -299,6 +491,157 @@ function draw_grogu()
 	spr(g.sprite,g.x*8,g.y*8,
 	1,1,g.flip)
 end
+--player_lovelace
+
+function update_lovelace()
+	if (btn(➡️)) l.x+=l.speed
+	if (btn(⬅️)) l.x-=l.speed
+	if (btn(⬆️)) l.y-=l.speed
+	if (btn(⬇️)) l.y+=l.speed
+	if (btnp(❎)) shoot()
+   
+	for e in all(enemies) do
+		if  collision(e,l) then
+			l.life-=1
+			create_explosion(e.x+1.5,e.y+4)
+			del(enemies,e)
+		end	
+   end
+	   
+	   for b in all(new_boss_bombs) do
+		   if collision(b,l) then
+			   l.life-=1
+			   create_explosion(b.x+1.5,b.y+4)
+			   del(new_boss_bombs,b)
+		   end	
+	   end
+	   
+	   if(l.life<=0) state=1
+   end
+	
+   function update_bordure()
+	   if l.x < 0 then 
+		   l.x=1
+	   end
+	   if l.x > 127 then
+		   l.x=110
+	   end
+   end
+-->8
+--game over-boss
+function update_gameover_shooter()
+	if (btn(🅾️)) _init()
+end
+
+function draw_gameover_shooter()
+	cls(0)
+	--rectfill(x,y,x2,y2,couleur)
+	rectfill(15,40,105,90,7)
+	print("score:\n"..score,50,50,3)
+	print("press c to continue",20,70,3)
+end
+function spawn_boss()
+	new_boss={
+	x=50,
+	y=-35,
+	life=40,
+	speed=0.5,
+shoot_timer=0
+}
+add(boss,new_boss)	
+end --fonctionne
+
+function update_boss()
+for new_boss in all(boss) do
+if new_boss.y<10 then
+	new_boss.y+=0.5
+end
+--collision
+for b in all(bullets) do
+if collision_boss(new_boss,b) then
+	create_explosion_boss(b.x+1.5,b.y+3)	
+	del (bullets,b)
+	new_boss.life-=1
+	if new_boss.life<=0 then
+	state=2
+		end
+end
+end
+		
+new_boss.shoot_timer+=1
+if new_boss.shoot_timer==60 then
+	shoot_boss(new_boss)
+	new_boss.shoot_timer=0
+end
+end	
+end
+
+--shoot_boss
+function angle_to(x1,y1,x2,y2)
+return atan2(y2-y1,x2-x1)+0.25
+end	
+
+function shoot_boss(new_boss)
+	local angle=angle_to(new_boss.x,new_boss.y,l.x,l.y)
+	local new_bomb={
+		x=new_boss.x+14, y=new_boss.y+33,
+		w=4, h=5,
+		speed=2,
+		dx=cos(angle),
+		dy=-sin(angle)
+	}
+	add(new_boss_bombs,new_bomb)
+end
+
+function update_bombs()
+	for new_bomb in all (new_boss_bombs) do
+		new_bomb.x+=new_bomb.dx*new_bomb.speed
+		new_bomb.y+=new_bomb.dy*new_bomb.speed
+		if (new_bomb.y>128) del(new_boss_bombs,new_bomb)
+	end
+end
+--collisions  explosion boss
+function collision_boss(a,b)
+	if a.x>b.x+32 
+	or a.y>b.y+32
+	or a.x+32<b.x
+	or a.y+32<b.y then 
+		return false
+	else
+		return true
+	end
+end
+
+--explosions	
+function create_explosion_boss(x,y)
+	--sfx(1)
+	add(explosions_boss,{x=x,y=y,timer=0})
+end
+
+function update_explosions_boss()
+	for boum in all(explosions_boss) do
+		boum.timer+=1
+		if boum.timer==13 then
+			del(explosions_boss,boum)
+		end
+	end
+end
+
+function draw_explosions_boss()
+	--circ(x,y,rayon,couleur)
+	
+	for boum in all(explosions_boss) do
+		circ(boum.x,boum.y,boum.timer/3,8+boum.timer%3)
+	end
+end
+-->8
+--victory
+function draw_victory()
+	cls(13)
+	print("bravo alop!\nvous avez sauve grogu",20,80,0)
+	print(spr(96,40,52),spr(97,49,52),spr(98,58,52),spr(99,67,52))
+	stop()							
+end	
 -->8
 --stars
 function create_stars()
@@ -610,11 +953,11 @@ b1b1b1b1b1b1b17070b1911727171717000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000d111111d000000000000ddd777777777777777ddddddd000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000050dd0500000000000ddddd777777777777777777dddd000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000ddddd777777777777777777dddd000000000000000000000000000
-000000000000000000000000000000000000000000000000000000000000000000000000ddddddd777777777777777777dddddd0000000000000000000000000
-000000000000000000000000000000000000000000000000000000000000000000000000ddddddd777777777777777777dddddd0000000000000000000000000
+000000000000000000000000000000000000000000000000000000000aa00aa000000000ddddddd777777777777777777dddddd0000000000000000000000000
+000000000000000000000000000000000000000000000000000000000aa00aa000000000ddddddd777777777777777777dddddd0000000000000000000000000
+00000000000000000000000000000000000000000000000000000000099009900000000088889999888888899998888889999880000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000088889999888888899998888889999880000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000088889999888888899998888889999880000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000889999880008899998800889999880000000000000000000000000
+00000000000000000000000000000000000000000000000000000000099009900000000000889999880008899998800889999880000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000889999880008899998800889999880000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000008888000000088880000008888000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000008888000000088880000008888000000000000000000000000000
