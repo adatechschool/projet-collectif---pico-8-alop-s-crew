@@ -659,13 +659,8 @@ function draw_victory()
 	cls(0)
 	print("bravo alop! \nvous avez sauve grogu",20,80,7)
 	print(spr(96,40,52),spr(97,49,52),spr(98,58,52),spr(99,67,52))
-<<<<<<< HEAD
 	stop()
 end
-=======
-	stop()					
-end	
->>>>>>> 08d9577497408186fd2210388b5ec1efc88d823c
 -->8
 --stars
 function create_stars()
